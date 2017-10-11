@@ -1,0 +1,67 @@
+{
+  "name": "puppetoon",
+  "description": "puppetoon",
+  "version": "0.0.0",
+  "main": "lib/Puppetoon",
+  "bin": {
+    "puppetoon": "bin/wrong-puppetoon"
+  },
+  "files": [
+    "*.md",
+    "bin",
+    "lib"
+  ],
+  "scripts": {
+    "start": "babel-node test/test.js",
+    "prebuild": "rimraf lib",
+    "build": "babel src -d lib",
+    "preversion": "yarn build"
+  },
+  "author": "Cap32",
+  "repository": "Cap32/puppetoon",
+  "engines": {
+    "node": ">=4"
+  },
+  "keywords": [],
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^2.1.0",
+    "puppeteer": "^0.11.0",
+    "signal-exit": "^3.0.2",
+    "uuid": "^3.1.0",
+    "ws": "^3.2.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.11.4",
+    "babel-core": "^6.13.2",
+    "babel-eslint": "^7.2.3",
+    "babel-jest": "^19.0.0",
+    "babel-plugin-transform-es2015-destructuring": "^6.19.0",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.18.0",
+    "babel-plugin-transform-es2015-parameters": "^6.18.0",
+    "babel-plugin-transform-es2015-spread": "^6.22.0",
+    "babel-polyfill": "^6.13.0",
+    "babel-preset-stage-0": "^6.5.0",
+    "babel-register": "^6.11.6",
+    "cross-env": "^4.0.0",
+    "delay": "^2.0.0",
+    "eslint": "^3.19.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.2.0",
+    "eslint-plugin-jest": "^19.0.1",
+    "eslint-plugin-node": "^4.2.2",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "jest": "^19.0.2",
+    "rimraf": "^2.5.4"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "src/**/*.js"
+    ],
+    "modulePathIgnorePatterns": [
+      "node_modules",
+      "lib"
+    ]
+  }
+}
