@@ -34,7 +34,11 @@ export default class Browser {
 		this._chrome && this._chrome.close();
 	}
 
-	// async version() {
-	// 	return this._chrome ? this._chrome.version() : '-';
-	// }
+	async version() {
+		return this._api.version();
+	}
+
+	async getQueueSize() {
+		return this._api.getQueueSize();
+	}
 }
