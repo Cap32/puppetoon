@@ -12,9 +12,11 @@ export default class Puppetoon {
 		}
 
 		const server = new APIServer(options);
+		let browser;
 
 		process.on('exit', () => {
 			server.close();
+			browser && browser.close();
 		});
 
 		signals().forEach((signal) => {
@@ -23,7 +25,7 @@ export default class Puppetoon {
 
 		return new Promise((resolve) => {
 			server.listen((api) => {
-				const browser = new Browser(server, api);
+				browser = new Browser(server, api);
 				resolve(browser);
 			});
 		});
