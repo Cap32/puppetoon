@@ -15,8 +15,10 @@ import Puppetoon from '../src/Puppetoon';
 		const page = await browser.newPage();
 		console.log('page created');
 
-		const { size } = await browser.getQueueSize();
-		console.log('queue size', size);
+		await Promise.all(new Array(3).fill().map(async () => {
+			const { size } = await browser.getQueueSize();
+			console.log('queue size', size);
+		}));
 
 		await page.close();
 		console.log('page closed');

@@ -1,19 +1,19 @@
 
-import APIServer from './APIServer';
+import Connection from './Connection';
 import { signals } from 'signal-exit';
 import Browser from './Browser';
 
 export default class Puppetoon {
-	static connect(options = {}) {
+	static async connect(options = {}) {
 		if (!options.url) {
 			throw new Error('[Puppetoon.connect]: Missing `url`');
 		}
 
-		const server = new APIServer(options);
-		let browser;
+		const connection = await Connection.create(options);
+		const browser = new Browser(connection);
 
 		process.on('exit', () => {
-			server.close();
+			connection.close();
 			browser && browser.close();
 		});
 
@@ -23,12 +23,6 @@ export default class Puppetoon {
 			});
 		}
 
-
-		return new Promise((resolve) => {
-			server.listen((api) => {
-				browser = new Browser(server, api);
-				resolve(browser);
-			});
-		});
+		return browser;
 	}
 }
