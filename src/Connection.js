@@ -19,23 +19,26 @@ export default class Connection extends EventEmitter {
 		super();
 
 		const ws = this._ws = new WebSocket(options.url);
-		const callbacks = {};
+		const callbacks = new Map();
 
 		this.send = (type, payload) => {
 			return new Promise((resolve, reject) => {
 				const _id = uuid();
-				callbacks[_id] = (res) => {
-					Reflect.deleteProperty(callbacks, _id);
+
+				callbacks.set(_id, (res) => {
+					callbacks.delete(_id);
 					if (res.error) { reject(res); }
 					else { resolve(res); }
-				};
+				});
+
 				this._ws.send(JSON.stringify({ _id, type, payload }));
 			});
 		};
 
 		this.on(EventType, (_id, payload) => {
-			if (callbacks[_id]) {
-				callbacks[_id](payload);
+			if (callbacks.has(_id)) {
+				const handler = callbacks.get(_id);
+				handler(payload);
 			}
 		});
 
