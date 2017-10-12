@@ -19,9 +19,12 @@ export default class Puppetoon {
 			browser && browser.close();
 		});
 
-		signals().forEach((signal) => {
-			process.on(signal, process.exit);
-		});
+		if (options.handleSIGNALS !== false) {
+			signals().forEach((signal) => {
+				process.on(signal, process.exit);
+			});
+		}
+
 
 		return new Promise((resolve) => {
 			server.listen((api) => {
