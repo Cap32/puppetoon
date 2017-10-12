@@ -28,7 +28,7 @@ export default class Browser {
 	async close() {
 		await Promise.all(Object.keys(this._pages).map((id) => {
 			const page = this._pages[id];
-			return page.close();
+			return page && page.close();
 		}));
 		this._server.close();
 		this._chrome && this._chrome.close();

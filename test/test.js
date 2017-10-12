@@ -23,7 +23,7 @@ import Puppetoon from '../src/Puppetoon';
 
 		await browser.runInPage(async (page, index) => {
 			if (index < 2) { throw new Error('you suck'); }
-			// await page.close();
+			await page.close();
 			return 'ok';
 		});
 

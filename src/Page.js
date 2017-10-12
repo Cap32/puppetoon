@@ -6,6 +6,7 @@ export default class Page {
 			get(target, method) {
 				if (method === 'close') {
 					return async function close() {
+						if (!page._client._connection) { return; }
 						await page.close();
 						await closePage();
 					};
