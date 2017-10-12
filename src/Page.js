@@ -11,6 +11,7 @@ export default class Page {
 						await closePage();
 					};
 				}
+				return page[method];
 			}
 		});
 	}
