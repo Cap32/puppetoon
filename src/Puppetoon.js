@@ -3,8 +3,6 @@ import APIServer from './APIServer';
 import { signals } from 'signal-exit';
 import Browser from './Browser';
 
-process.on('unhandledRejection', (r) => console.log(r));
-
 export default class Puppetoon {
 	static connect(options = {}) {
 		if (!options.url) {
