@@ -16,6 +16,9 @@ import delay from 'delay';
 		const page = await browser.newPage();
 		console.log('page created');
 
+		await page.goto('https://baidu.com');
+		console.log('page title', await page.title());
+
 		await Promise.all(new Array(3).fill().map(async () => {
 			const { size } = await browser.getQueueSize();
 			console.log('queue size', size);
