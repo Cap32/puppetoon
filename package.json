@@ -1,7 +1,7 @@
 {
   "name": "puppetoon",
   "description": "puppetoon",
-  "version": "0.0.0-6",
+  "version": "0.0.0-7",
   "main": "lib/Puppetoon",
   "bin": {
     "puppetoon": "bin/wrong-puppetoon"
