@@ -28,8 +28,8 @@ export default class Client extends EventEmitter {
 		const query = Object.assign(QueryString.parse(urlObj.query), {
 			concurrency,
 		});
-		urlObj.query = QueryString.stringify(query);
-		Reflect.deleteProperty(urlObj, 'search');
+
+		urlObj.search = `?${QueryString.stringify(query)}`;
 		const wsUrl = URL.format(urlObj);
 
 		const ws = this._ws = new WebSocket(wsUrl);

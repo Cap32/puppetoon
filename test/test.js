@@ -8,6 +8,7 @@ import delay from 'delay';
 	try {
 		browser = await Puppetoon.connect({
 			url: 'ws://127.0.0.1:8808/test',
+			concurrency: 5,
 		});
 
 		const { version } = await browser.version();
@@ -19,20 +20,22 @@ import delay from 'delay';
 		await page.goto('https://baidu.com');
 		console.log('page title', await page.title());
 
-		await Promise.all(new Array(3).fill().map(async () => {
-			const { size } = await browser.getQueueSize();
-			console.log('queue size', size);
-		}));
-
-		await delay(2000);
+		const { size } = await browser.getQueueSize();
+		console.log('queue size', size);
 
 		await page.close();
 		console.log('page closed');
 
+		await delay(1000);
+
+		await Promise.all(new Array(3).fill().map(async (_, index) => {
+			await browser.newPage();
+			console.log('new page', index);
+		}));
+
 		const result = await browser.runInPage(async (page, index) => {
 			await delay(1000);
 			if (index < 2) { throw new Error('you suck'); }
-			await page.close();
 			return 'ok';
 		});
 		console.log('runInPage', result);
