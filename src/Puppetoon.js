@@ -14,12 +14,14 @@ export default class Puppetoon {
 
 		process.on('exit', () => {
 			connection.close();
-			browser && browser.close();
 		});
 
 		if (options.handleSIGNALS !== false) {
 			signals().forEach((signal) => {
-				process.on(signal, process.exit);
+				process.on(signal, async () => {
+					if (browser) { await browser.close(); }
+					process.exit(130);
+				});
 			});
 		}
 

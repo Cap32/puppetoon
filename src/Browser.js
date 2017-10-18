@@ -2,35 +2,58 @@
 import Puppeteer from 'puppeteer';
 import Page from './Page';
 
+class Chunk {
+	constructor(wsEndpoint) {
+		this._wsEndpoint = wsEndpoint;
+	}
+
+	async browser() {
+		return Puppeteer.connect({
+			browserWSEndpoint: this._wsEndpoint,
+		});
+	}
+}
+
 export default class Browser {
 	constructor(connection) {
 		this._connection = connection;
-		this._pages = {};
-		this._chrome = null;
+		this._pages = new Set();
+		this._chunks = new Map();
 	}
 
 	async newPage(options) {
-		const { id, wsEndpoint } = await this._connection.send('newPage', options);
-		const chrome = this._chrome ||
-			(this._chrome = await Puppeteer.connect({
-				browserWSEndpoint: wsEndpoint,
-			}))
-		;
-		const page = await Page.create(chrome, async () => {
-			Reflect.deleteProperty(this._pages, id);
-			return this._connection.send('closePage', { id });
+		const {
+			targetId, wsEndpoint,
+		} = await this._connection.send('newPage', options);
+
+		let chunk;
+
+		if (this._chunks.has(wsEndpoint)) {
+			chunk = this._chunks.get(wsEndpoint);
+		}
+		else {
+			chunk = new Chunk(wsEndpoint);
+			this._chunks.set(wsEndpoint, chunk);
+		}
+
+		const browser = await chunk.browser();
+		const page = await Page.create(browser, targetId, async () => {
+			this._pages.delete(page);
+			return this._connection.send('closePage', { targetId });
 		});
-		this._pages[id] = page;
+		this._pages.add(page);
 		return page;
 	}
 
 	async close() {
-		await Promise.all(Object.keys(this._pages).map((id) => {
-			const page = this._pages[id];
-			return page && page.close();
-		}));
+		const promises = [];
+		for (const page of this._pages) {
+			promises.push(page.close.bind(page));
+		}
+		await Promise.all(promises);
+		this._pages.clear();
+		this._chunks.clear();
 		this._connection.close();
-		this._chrome && this._chrome.close();
 	}
 
 	async runInPage(fn, options = {}) {

@@ -1,12 +1,13 @@
 
 import Puppetoon from '../src/Puppetoon';
 // const Puppetoon = require('puppetoon');
+import delay from 'delay';
 
 (async function main() {
 	let browser;
 	try {
 		browser = await Puppetoon.connect({
-			url: 'ws://127.0.0.1:8808',
+			url: 'ws://127.0.0.1:8808/test',
 		});
 
 		const { version } = await browser.version();
@@ -20,14 +21,18 @@ import Puppetoon from '../src/Puppetoon';
 			console.log('queue size', size);
 		}));
 
+		await delay(2000);
+
 		await page.close();
 		console.log('page closed');
 
-		await browser.runInPage(async (page, index) => {
+		const result = await browser.runInPage(async (page, index) => {
+			await delay(1000);
 			if (index < 2) { throw new Error('you suck'); }
 			await page.close();
 			return 'ok';
 		});
+		console.log('runInPage', result);
 
 		await browser.close();
 		console.log('browser closed');

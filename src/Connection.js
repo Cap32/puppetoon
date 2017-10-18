@@ -2,13 +2,15 @@
 import EventEmitter from 'events';
 import WebSocket from 'ws';
 import uuid from 'uuid/v4';
+import URL from 'url';
+import QueryString from 'querystring';
 
-const EventType = 'CALL';
+const EventType = 'API_CALL';
 
-export default class Connection extends EventEmitter {
-	static create(options) {
+export default class Client extends EventEmitter {
+	static create(options = {}) {
 		return new Promise((resolve, reject) => {
-			const connection = new Connection(options, (err) => {
+			const connection = new Client(options, (err) => {
 				if (err) { reject(err); }
 				else { resolve(connection); }
 			});
@@ -18,7 +20,19 @@ export default class Connection extends EventEmitter {
 	constructor(options, callback) {
 		super();
 
-		const ws = this._ws = new WebSocket(options.url);
+		const {
+			onError, url, concurrency,
+		} = options;
+
+		const urlObj = URL.parse(url);
+		const query = Object.assign(QueryString.parse(urlObj.query), {
+			concurrency,
+		});
+		urlObj.query = QueryString.stringify(query);
+		Reflect.deleteProperty(urlObj, 'search');
+		const wsUrl = URL.format(urlObj);
+
+		const ws = this._ws = new WebSocket(wsUrl);
 		const callbacks = new Map();
 
 		this.send = (type, payload) => {
@@ -49,7 +63,7 @@ export default class Connection extends EventEmitter {
 				this.emit(EventType, _id, payload);
 			}
 			catch (err) {
-				console.error('Invalid message', err);
+				onError && onError(err);
 			}
 		});
 
@@ -58,6 +72,9 @@ export default class Connection extends EventEmitter {
 	}
 
 	close() {
-		this._ws && this._ws.terminate();
+		if (this._ws) {
+			this._ws.terminate();
+			this._ws = null;
+		}
 	}
 }
