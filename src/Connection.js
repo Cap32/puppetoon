@@ -5,7 +5,10 @@ import uuid from 'uuid/v4';
 import URL from 'url';
 import QueryString from 'querystring';
 
-const EventType = 'API_CALL';
+const Events = {
+	ApiCall: 'ApiCall',
+	Close: 'Close',
+};
 
 export default class Client extends EventEmitter {
 	static create(options = {}) {
@@ -21,15 +24,16 @@ export default class Client extends EventEmitter {
 		super();
 
 		const {
-			onError, url, concurrency,
+			onError, url, concurrency, store,
 		} = options;
 
 		const urlObj = URL.parse(url);
 		const query = Object.assign(QueryString.parse(urlObj.query), {
 			concurrency,
 		});
-
 		urlObj.search = `?${QueryString.stringify(query)}`;
+		if (store) { urlObj.pathname = store; }
+
 		const wsUrl = URL.format(urlObj);
 
 		const ws = this._ws = new WebSocket(wsUrl);
@@ -49,7 +53,7 @@ export default class Client extends EventEmitter {
 			});
 		};
 
-		this.on(EventType, (_id, payload) => {
+		this.on(Events.ApiCall, (_id, payload) => {
 			if (callbacks.has(_id)) {
 				const handler = callbacks.get(_id);
 				handler(payload);
@@ -60,15 +64,23 @@ export default class Client extends EventEmitter {
 			try {
 				const { _id, payload } = JSON.parse(message);
 				if (!_id) { throw new Error('Missing _id'); }
-				this.emit(EventType, _id, payload);
+				this.emit(Events.ApiCall, _id, payload);
 			}
 			catch (err) {
 				onError && onError(err);
 			}
 		});
 
+		ws.on('close', () => {
+			this.emit(Events.Close);
+		});
+
 		ws.on('open', callback);
 		ws.on('error', callback);
+	}
+
+	onClose(handler) {
+		this.on(Events.Close, handler);
 	}
 
 	close() {

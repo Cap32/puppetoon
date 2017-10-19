@@ -33,6 +33,8 @@ import delay from 'delay';
 			console.log('new page', index);
 		}));
 
+		await delay(10000);
+
 		const result = await browser.runInPage(async (page, index) => {
 			await delay(1000);
 			if (index < 2) { throw new Error('you suck'); }
