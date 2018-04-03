@@ -11,22 +11,19 @@ export default class Page {
 			browser._screenshotTaskQueue
 		);
 
-		return new Proxy(
-			{},
-			{
-				...Reflect,
-				get(target, method) {
-					if (method === 'close') {
-						return async function close() {
-							if (!browser._connection) {
-								return;
-							}
-							return closePage();
-						};
-					}
-					return page[method];
+		return new Proxy(page, {
+			...Reflect,
+			get(target, method) {
+				if (method === 'close') {
+					return async function close() {
+						if (!browser._connection) {
+							return;
+						}
+						return closePage();
+					};
 				}
+				return page[method];
 			}
-		);
+		});
 	}
 }
